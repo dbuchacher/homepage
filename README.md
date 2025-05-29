@@ -8,6 +8,10 @@ A beautiful, customizable browser homepage with drag-and-drop functionality, rea
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
+## 🌐 Live Demo
+
+**Try it now**: [https://dbuchacher.github.io/homepage/](https://dbuchacher.github.io/homepage/)
+
 ## ✨ Features
 
 ### 🎨 **Modern Design**
@@ -49,29 +53,46 @@ A beautiful, customizable browser homepage with drag-and-drop functionality, rea
 
 ## 🚀 Quick Start
 
-### 1. **Download & Setup**
-```bash
-# Clone or download the repository
-git clone https://github.com/yourusername/modern-homepage.git
-cd modern-homepage
+### **Option 1: Use GitHub Pages (Recommended)**
+1. **Visit**: [https://dbuchacher.github.io/homepage/](https://dbuchacher.github.io/homepage/)
+2. **Set as homepage** in your browser:
+   - **Firefox**: Settings → Home → Homepage → Custom URLs → `https://dbuchacher.github.io/homepage/`
+   - **Chrome**: Settings → On startup → Open specific pages → Add `https://dbuchacher.github.io/homepage/`
+   - **Safari**: Preferences → General → Homepage → Set to `https://dbuchacher.github.io/homepage/`
 
-# Or simply download and extract the ZIP file
+### **Option 2: Download & Host Locally**
+
+#### **Method A: Clone Repository**
+```bash
+git clone https://github.com/dbuchacher/homepage.git
+cd homepage
 ```
 
-### 2. **Open in Browser**
+#### **Method B: Download ZIP**
+1. Go to [https://github.com/dbuchacher/homepage](https://github.com/dbuchacher/homepage)
+2. Click "Code" → "Download ZIP"
+3. Extract to your desired location
+
+#### **Open in Browser**
 ```bash
 # Option 1: Direct file opening
 open index.html
 
-# Option 2: Local server (recommended)
+# Option 2: Local server (recommended for development)
 python -m http.server 8000
 # Then visit: http://localhost:8000
 ```
 
-### 3. **Set as Homepage**
-- **Firefox**: Settings → Home → Homepage → Custom URLs → `file:///path/to/index.html`
-- **Chrome**: Settings → On startup → Open specific pages → Add `file:///path/to/index.html`
+#### **Set as Local Homepage**
+- **Firefox**: Settings → Home → Homepage → Custom URLs → `file:///path/to/homepage/index.html`
+- **Chrome**: Settings → On startup → Open specific pages → Add `file:///path/to/homepage/index.html`
 - **Safari**: Preferences → General → Homepage → Set to file path
+
+### **Option 3: Fork for Customization**
+1. **Fork the repository** on GitHub
+2. **Enable GitHub Pages** in your fork's settings
+3. **Customize** the code to your liking
+4. **Your personalized homepage** will be available at `https://yourusername.github.io/homepage/`
 
 ## 🎮 Usage Guide
 
@@ -104,15 +125,40 @@ python -m http.server 8000
 - **Export**: Right-click → "Export Bookmarks" (saves .json file)
 - **Import**: Right-click → "Import Bookmarks" (restores from .json)
 
+## 🔧 Development
+
+### **Local Development Setup**
+```bash
+# Clone the repository
+git clone https://github.com/dbuchacher/homepage.git
+cd homepage
+
+# Start local server
+python -m http.server 8000
+# Or use any other local server
+
+# Open in browser
+open http://localhost:8000
+```
+
+### **Making Changes**
+1. **Edit the files** in your local copy
+2. **Test locally** before committing
+3. **Commit and push** to your fork
+4. **GitHub Pages will auto-update** (may take a few minutes)
+
 ## 🗂️ File Structure
 
 ```
-modern-homepage/
+homepage/
 ├── index.html              # Main HTML file
 ├── css/
 │   └── styles.css          # All styling and animations
 ├── js/
 │   └── app.js              # Core functionality and logic
+├── data/
+│   └── bookmarks.json      # Sample data (not used in production)
+├── .gitignore              # Git ignore rules
 └── README.md               # This file
 ```
 
