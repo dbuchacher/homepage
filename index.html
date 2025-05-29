@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Homepage 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Centered Layout Container -->
+        <div class="layout-container" id="layoutContainer">
+            <!-- Search Bar -->
+            <div class="search-container draggable-element" id="searchBar">
+                <form class="search-form" method="GET" action="https://www.google.com/search">
+                    <input name="q" type="text" class="search-input" placeholder="Search the web...">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                <div class="resize-handle"></div>
+            </div>
+
+            <!-- Pirate Bay Search Bar -->
+            <div class="pirate-container draggable-element" id="pirateBar">
+                <div class="pirate-form">
+                    <input type="text" class="pirate-input" id="pirateInput" placeholder="Search torrents...">
+                    <button type="button" class="pirate-btn" onclick="searchPirateBay()">
+                        <i class="fas fa-ship"></i>
+                    </button>
+                </div>
+                <div class="resize-handle"></div>
+            </div>
+
+            <!-- Crypto Widget -->
+            <div class="crypto-widget draggable-element" id="cryptoWidget1">
+                <div class="crypto-content clickable-widget" id="coinGeckoWidget" onclick="openCoinGecko()">
+                    <h3>Bitcoin 15 Days</h3>
+                    <div class="price-display">Loading...</div>
+                    <canvas id="chart1" class="crypto-chart"></canvas>
+                    <div class="price-source">CoinGecko</div>
+                </div>
+                <div class="resize-handle"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="addBookmark()">
+            <i class="fas fa-plus"></i>
+            Add Bookmark
+        </div>
+        <div class="context-menu-item" onclick="addGroup()">
+            <i class="fas fa-folder-plus"></i>
+            Add Group
+        </div>
+        <div class="context-menu-item" onclick="exportData()">
+            <i class="fas fa-download"></i>
+            Export Bookmarks
+        </div>
+        <div class="context-menu-item" onclick="importData()">
+            <i class="fas fa-upload"></i>
+            Import Bookmarks
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+
+    <!-- Add Bookmark Modal -->
+    <div class="modal" id="bookmarkModal">
+        <div class="modal-content">
+            <h3>Add Bookmark</h3>
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="bookmarkName" placeholder="Enter bookmark name">
+            </div>
+            <div class="form-group">
+                <label>URL</label>
+                <input type="url" id="bookmarkUrl" placeholder="https://example.com">
+            </div>
+            <div class="form-group">
+                <label>Icon URL (optional)</label>
+                <input type="url" id="bookmarkIcon" placeholder="https://example.com/favicon.ico">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveBookmark()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html> 
