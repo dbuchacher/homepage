@@ -109,14 +109,14 @@
             "icon": "https://www.google.com/s2/favicons?domain=crates.io&sz=32"
           },
           {
-            "name": "http://10.0.0.1/",
-            "url": "http://10.0.0.1/",
-            "icon": "https://www.google.com/s2/favicons?domain=https://19216801.one/sz=32"
-          },
-          {
             "name": "Mapster",
             "url": "https://mapster.talv.space/galaxy/reference",
             "icon": "https://www.google.com/s2/favicons?domain=mapster.talv.space&sz=32"
+          },
+          {
+            "name": "http://10.0.0.1/",
+            "url": "http://10.0.0.1/",
+            "icon": "https://www.google.com/s2/favicons?domain=https://19216801.one/sz=32"
           }
         ]
       },
@@ -205,6 +205,6 @@
       "height": "160px"
     }
   },
-  "exportDate": "2025-05-29T20:40:55.405Z",
+  "exportDate": "2025-05-29T23:36:33.482Z",
   "version": "2.0"
 }

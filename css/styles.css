@@ -49,54 +49,38 @@ body.show-grid::before {
     padding: 20px 0 0 0;
 }
 
-/* Draggable Elements (Unlocked - Orange) */
+/* Draggable Elements - Clean styling without visual indicators */
 .draggable-element {
     position: absolute;
-    cursor: move;
-    border: 2px solid rgba(255, 165, 0, 0.4);
-    transition: border-color 0.2s ease;
+    cursor: default;
     user-select: none;
 }
 
 .draggable-element:hover {
-    border-color: rgba(255, 165, 0, 0.6);
+    /* No visual changes on hover */
 }
 
 .draggable-element.dragging {
-    border-color: rgba(255, 165, 0, 0.8);
     z-index: 1000;
+    opacity: 0.8;
 }
 
+/* Remove the move icon completely */
 .draggable-element::before {
-    content: '↔️';
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    background: rgba(255, 165, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    z-index: 1001;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: none;
 }
 
-/* Locked Elements (Gray) */
+/* Locked Elements - No visual difference since we removed indicators */
 .draggable-element.locked {
-    cursor: default !important;
-    border-color: rgba(92, 92, 92, 0.3) !important;
+    cursor: default;
 }
 
 .draggable-element.locked:hover {
-    border-color: rgba(92, 92, 92, 0.5) !important;
+    /* No visual changes */
 }
 
 .draggable-element.locked::before {
-    display: none !important;
+    display: none;
 }
 
 .draggable-element.locked .resize-handle {
@@ -140,7 +124,7 @@ body.show-grid::before {
     border-radius: 20px;
     padding: 10px 20px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
     width: 600px;
     min-width: 300px;
     max-width: 800px;
@@ -201,8 +185,8 @@ body.show-grid::before {
     left: 50%;
     transform: translateX(-50%);
     backdrop-filter: blur(20px);
-    background: rgba(139, 69, 19, 0.3);
-    border: 1px solid rgba(210, 105, 30, 0.3);
+    background: rgb(32, 32, 32);
+    border: 1px solid rgba(92, 92, 92, 0.3);
     border-radius: 20px;
     padding: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -212,13 +196,14 @@ body.show-grid::before {
     height: 60px;
     min-height: 50px;
     max-height: 100px;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .pirate-container:hover {
-    background: rgba(139, 69, 19, 0.4);
-    border-color: rgba(210, 105, 30, 0.5);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    background: rgb(32, 32, 32);
+    border-color: rgba(92, 92, 92, 0.5);
 }
 
 .pirate-form {
@@ -242,7 +227,7 @@ body.show-grid::before {
 }
 
 .pirate-btn {
-    background: rgba(210, 105, 30, 0.7);
+    background: rgba(92, 92, 92, 0.6);
     border: none;
     color: white;
     padding: 8px 12px;
@@ -252,7 +237,7 @@ body.show-grid::before {
 }
 
 .pirate-btn:hover {
-    background: rgba(210, 105, 30, 0.9);
+    background: rgb(92, 92, 92);
     transform: scale(1.05);
 }
 
@@ -264,7 +249,7 @@ body.show-grid::before {
     border-radius: 20px;
     padding: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     position: absolute;
     width: 300px;
     min-width: 120px;
@@ -296,21 +281,14 @@ body.show-grid::before {
     background: transparent;
     border: none;
     outline: none;
-    cursor: pointer;
+    cursor: default;
     width: 100%;
     text-align: center;
     font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     letter-spacing: 0.02em;
 }
 
-.group-title:focus {
-    cursor: text;
-    background: rgba(92, 92, 92, 0.4);
-    padding: 5px 10px;
-    border-radius: 8px;
-    color: rgba(255, 255, 255, 0.95);
-    font-weight: 600;
-}
+/* Remove focus styles since it's no longer editable */
 
 .bookmark-grid {
     display: grid;
@@ -535,7 +513,7 @@ body.show-grid::before {
     border-radius: 20px;
     padding: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .crypto-widget:hover {

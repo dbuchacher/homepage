@@ -2,8 +2,8 @@
 const CONFIG = {
     GRID_SIZE: 20,
     CRYPTO_UPDATE_INTERVAL: 300000, // 5 minutes
-    LAYOUT_LOAD_DELAY: 200,
-    GROUP_INIT_DELAY: 100,
+    LAYOUT_LOAD_DELAY: 0,
+    GROUP_INIT_DELAY: 0,
     
     // Default positioning
     GROUP_DEFAULT: {
@@ -97,7 +97,6 @@ let homeData = {
 };
 
 let currentGroupId = null;
-let draggedItem = null;
 
 // Grid settings for snap-to-grid functionality
 const GRID_SIZE = 20; // 20px grid
@@ -170,15 +169,13 @@ function renderGroups() {
         DOM.layoutContainer.appendChild(groupEl);
     });
     
-    // Re-initialize drag and resize for new groups
-    setTimeout(() => {
-        document.querySelectorAll(SELECTORS.GROUP_CARDS).forEach(element => {
-            makeDraggable(element);
-            makeResizable(element);
-        });
-        loadLayout();
-        updateGlobalLockVisuals();
-    }, CONFIG.GROUP_INIT_DELAY);
+    // Re-initialize drag and resize for new groups immediately
+    document.querySelectorAll(SELECTORS.GROUP_CARDS).forEach(element => {
+        makeDraggable(element);
+        makeResizable(element);
+    });
+    loadLayout();
+    updateGlobalLockVisuals();
 }
 
 // Create group element
@@ -198,7 +195,7 @@ function createGroupElement(group, index) {
     groupEl.style.top = defaultTop + 'px';
 
     const bookmarksHtml = group.bookmarks.map(bookmark => `
-        <a href="${bookmark.url}" class="bookmark-item" draggable="true" 
+        <a href="${bookmark.url}" class="bookmark-item"
            data-bookmark='${JSON.stringify(bookmark)}'>
             <img src="${bookmark.icon || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzU5NTk1OSIvPgo8cGF0aCBkPSJNOCAxNkMxMC4yMDkxIDE2IDEyIDE0LjIwOTEgMTIgMTJDMTIgOS43OTA4NiAxMC4yMDkxIDggOCA4QzUuNzkwODYgOCA0IDkuNzkwODYgNCAxMkM0IDE0LjIwOTEgNS43OTA4NiAxNiA4IDE2WiIgZmlsbD0iIzc3Nzc3NyIvPgo8cGF0aCBkPSJNMjQgMjBDMjMuNDQ3NyAyMCAyMyAyMC40NDc3IDIzIDIxVjIzQzIzIDIzLjU1MjMgMjMuNDQ3NyAyNCAyNCAyNEgyNkMyNi41NTIzIDI0IDI3IDIzLjU1MjMgMjcgMjNWMjFDMjcgMjAuNDQ3NyAyNi41NTIzIDIwIDI2IDIwSDI0WiIgZmlsbD0iIzc3Nzc3NyIvPgo8L3N2Zz4K'}" 
                  class="bookmark-icon" 
@@ -209,26 +206,22 @@ function createGroupElement(group, index) {
 
     groupEl.innerHTML = `
         <div class="group-header">
-            <input type="text" class="group-title" value="${group.title}" 
-                   onblur="updateGroupTitle('${group.id}', this.value)"
-                   onkeypress="if(event.key==='Enter') this.blur()">
+            <div class="group-title">${group.title}</div>
         </div>
-        <div class="bookmark-grid" 
-             ondrop="drop(event, '${group.id}')" 
-             ondragover="allowDrop(event)"
-             ondragenter="dragEnter(event)"
-             ondragleave="dragLeave(event)">
-            ${bookmarksHtml || '<div class="drop-zone">Drop bookmarks here or right-click to add</div>'}
+        <div class="bookmark-grid">
+            ${bookmarksHtml || '<div class="drop-zone">Right-click to add bookmarks</div>'}
         </div>
         <div class="resize-handle"></div>
     `;
 
-    // Add event listeners for drag and drop
+    // Add event listeners for bookmarks (no drag and drop)
     const bookmarkItems = groupEl.querySelectorAll('.bookmark-item');
     bookmarkItems.forEach(item => {
-        item.addEventListener('dragstart', dragStart);
-        item.addEventListener('dragend', dragEnd);
-        item.addEventListener('contextmenu', showBookmarkContextMenu);
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showBookmarkContextMenu(e, JSON.parse(item.dataset.bookmark), group.id);
+        });
     });
 
     // Add right-click context menu for group
@@ -241,61 +234,15 @@ function createGroupElement(group, index) {
     return groupEl;
 }
 
-// Drag and drop functions
-function dragStart(e) {
-    draggedItem = JSON.parse(e.target.dataset.bookmark);
-    e.target.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-}
-
-function dragEnd(e) {
-    e.target.classList.remove('dragging');
-    draggedItem = null;
-}
-
-function allowDrop(e) {
-    e.preventDefault();
-}
-
-function dragEnter(e) {
-    e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
-}
-
-function dragLeave(e) {
-    e.currentTarget.classList.remove('drag-over');
-}
-
-function drop(e, groupId) {
-    e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
-    
-    if (draggedItem) {
-        // Remove from source group
-        homeData.groups.forEach(group => {
-            group.bookmarks = group.bookmarks.filter(b => 
-                !(b.name === draggedItem.name && b.url === draggedItem.url)
-            );
-        });
-
-        // Add to target group
-        const targetGroup = homeData.groups.find(g => g.id === groupId);
-        if (targetGroup) {
-            targetGroup.bookmarks.push(draggedItem);
-        }
-
-        saveData();
-        renderGroups();
-    }
-}
-
 // Context menu functions
 function showGroupContextMenu(e, groupId) {
     const deleteItem = ContextMenuUtils.createMenuItem('trash', 'Delete Group', `deleteGroup('${groupId}')`);
     const addToGroupItem = ContextMenuUtils.createMenuItem('plus', 'Add Bookmark', `addBookmarkToGroup('${groupId}')`);
+    const changeTitleItem = ContextMenuUtils.createMenuItem('edit', 'Change Title', `changeGroupTitle('${groupId}')`);
     
     const menuHtml = [
         addToGroupItem,
+        changeTitleItem,
         ContextMenuUtils.getLockMenuItem(),
         deleteItem,
         ContextMenuUtils.getStandardMenuItems()
@@ -311,15 +258,28 @@ function showContextMenu(e) {
     menu.style.top = e.pageY + 'px';
 }
 
-function showBookmarkContextMenu(e) {
+function showBookmarkContextMenu(e, bookmark, groupId) {
     e.preventDefault();
     e.stopPropagation();
     
-    const bookmark = JSON.parse(e.currentTarget.dataset.bookmark);
-    const menuHtml = [
-        ContextMenuUtils.createMenuItem('edit', 'Edit Bookmark', `editBookmark('${bookmark.name}', '${bookmark.url}')`),
-        ContextMenuUtils.createMenuItem('trash', 'Delete Bookmark', `deleteBookmark('${bookmark.name}', '${bookmark.url}')`)
-    ].join('');
+    const menuHtml = `
+        <div class="context-menu-item" onclick="editBookmark('${bookmark.name}', '${bookmark.url}')">
+            <i class="fas fa-edit"></i>
+            Edit Bookmark
+        </div>
+        <div class="context-menu-item" onclick="setBookmarkOrder('${groupId}', '${bookmark.name}', '${bookmark.url}')">
+            <i class="fas fa-sort"></i>
+            Bookmark Order
+        </div>
+        <div class="context-menu-item" onclick="moveBookmarkToGroup('${groupId}', '${bookmark.name}', '${bookmark.url}')">
+            <i class="fas fa-folder-plus"></i>
+            Move to Group
+        </div>
+        <div class="context-menu-item" onclick="deleteBookmark('${bookmark.name}', '${bookmark.url}')">
+            <i class="fas fa-trash"></i>
+            Delete Bookmark
+        </div>
+    `;
     
     ContextMenuUtils.showMenu(e, menuHtml);
 }
@@ -328,14 +288,14 @@ function showBookmarkContextMenu(e) {
 document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     
-    // Check if clicking on a draggable element (search bar, crypto widget, etc.)
-    const draggableElement = e.target.closest('.draggable-element');
-    if (draggableElement) {
-        showDraggableElementContextMenu(e, draggableElement);
+    // Check if clicking on a bookmark first (most specific)
+    const bookmarkItem = e.target.closest('.bookmark-item');
+    if (bookmarkItem) {
+        showBookmarkContextMenu(e, JSON.parse(bookmarkItem.dataset.bookmark), bookmarkItem.closest('.group-card').dataset.groupId);
         return;
     }
     
-    // Check if clicking on a group card
+    // Check if clicking on a group card (before draggable check since groups are also draggable)
     const groupCard = e.target.closest('.group-card');
     if (groupCard) {
         const groupId = groupCard.dataset.groupId;
@@ -343,10 +303,10 @@ document.addEventListener('contextmenu', (e) => {
         return;
     }
     
-    // Check if clicking on a bookmark
-    const bookmarkItem = e.target.closest('.bookmark-item');
-    if (bookmarkItem) {
-        showBookmarkContextMenu(e);
+    // Check if clicking on other draggable elements (search bar, crypto widget, etc.)
+    const draggableElement = e.target.closest('.draggable-element');
+    if (draggableElement && !draggableElement.classList.contains('group-card')) {
+        showDraggableElementContextMenu(e, draggableElement);
         return;
     }
     
@@ -436,11 +396,29 @@ document.addEventListener('click', () => {
 });
 
 // Group management functions
+function changeGroupTitle(groupId) {
+    const group = homeData.groups.find(g => g.id === groupId);
+    if (!group) return;
+    
+    const newTitle = prompt(`Change group title:\n\nCurrent title: "${group.title}"`, group.title);
+    
+    if (newTitle === null) return; // User cancelled
+    
+    if (newTitle.trim() === '') {
+        alert('Group title cannot be empty');
+        return;
+    }
+    
+    updateGroupTitle(groupId, newTitle.trim());
+    document.getElementById('contextMenu').style.display = 'none';
+}
+
 function updateGroupTitle(groupId, newTitle) {
     const group = homeData.groups.find(g => g.id === groupId);
     if (group) {
         group.title = newTitle;
         saveData();
+        renderGroups();
     }
 }
 
@@ -585,6 +563,296 @@ function deleteBookmark(name, url, confirm = true) {
 function closeModal() {
     document.getElementById('bookmarkModal').style.display = 'none';
     currentGroupId = null;
+}
+
+// Bookmark management functions - order and move
+function setBookmarkOrder(groupId, bookmarkName, bookmarkUrl) {
+    const group = homeData.groups.find(g => g.id === groupId);
+    if (!group) return;
+    
+    const currentIndex = group.bookmarks.findIndex(b => b.name === bookmarkName && b.url === bookmarkUrl);
+    if (currentIndex === -1) return;
+    
+    const maxPosition = group.bookmarks.length;
+    const currentPosition = currentIndex + 1;
+    
+    // Hide context menu
+    document.getElementById('contextMenu').style.display = 'none';
+    
+    // Create visual position selector
+    showPositionSelector(groupId, bookmarkName, bookmarkUrl, currentPosition, maxPosition);
+}
+
+function showPositionSelector(groupId, bookmarkName, bookmarkUrl, currentPosition, maxPosition) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        backdrop-filter: blur(10px);
+    `;
+    
+    // Create modal content
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        background: rgb(59, 59, 59);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(92, 92, 92, 0.3);
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        text-align: center;
+    `;
+    
+    // Create title
+    const title = document.createElement('h3');
+    title.style.cssText = `
+        margin-bottom: 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+    `;
+    title.textContent = `Choose position for "${bookmarkName}"`;
+    
+    // Create subtitle
+    const subtitle = document.createElement('p');
+    subtitle.style.cssText = `
+        margin-bottom: 25px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    `;
+    subtitle.textContent = `Currently at position ${currentPosition}`;
+    
+    // Create button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+        justify-items: center;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    `;
+    
+    // Create position buttons
+    for (let i = 1; i <= maxPosition; i++) {
+        const button = document.createElement('button');
+        button.style.cssText = `
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            border: 2px solid ${i === currentPosition ? 'rgba(74, 222, 128, 0.8)' : 'rgba(92, 92, 92, 0.3)'};
+            background: ${i === currentPosition ? 'rgba(74, 222, 128, 0.2)' : 'rgb(32, 32, 32)'};
+            color: ${i === currentPosition ? '#4ade80' : 'white'};
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        `;
+        button.textContent = i;
+        
+        // Add hover effects
+        button.addEventListener('mouseenter', () => {
+            if (i !== currentPosition) {
+                button.style.background = 'rgba(92, 92, 92, 0.4)';
+                button.style.borderColor = 'rgba(92, 92, 92, 0.6)';
+                button.style.transform = 'scale(1.05)';
+            }
+        });
+        
+        button.addEventListener('mouseleave', () => {
+            if (i !== currentPosition) {
+                button.style.background = 'rgb(32, 32, 32)';
+                button.style.borderColor = 'rgba(92, 92, 92, 0.3)';
+                button.style.transform = 'scale(1)';
+            }
+        });
+        
+        // Add click handler
+        button.addEventListener('click', () => {
+            setBookmarkToPosition(groupId, bookmarkName, bookmarkUrl, i);
+            document.body.removeChild(overlay);
+        });
+        
+        buttonContainer.appendChild(button);
+    }
+    
+    // Create cancel button
+    const cancelButton = document.createElement('button');
+    cancelButton.style.cssText = `
+        padding: 12px 24px;
+        border: 1px solid rgba(92, 92, 92, 0.3);
+        border-radius: 10px;
+        background: rgb(32, 32, 32);
+        color: white;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    `;
+    cancelButton.textContent = 'Cancel';
+    
+    cancelButton.addEventListener('mouseenter', () => {
+        cancelButton.style.background = 'rgba(92, 92, 92, 0.3)';
+    });
+    
+    cancelButton.addEventListener('mouseleave', () => {
+        cancelButton.style.background = 'rgb(32, 32, 32)';
+    });
+    
+    cancelButton.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+    
+    // Assemble modal
+    modal.appendChild(title);
+    modal.appendChild(subtitle);
+    modal.appendChild(buttonContainer);
+    modal.appendChild(cancelButton);
+    overlay.appendChild(modal);
+    
+    // Add to page
+    document.body.appendChild(overlay);
+    
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    });
+}
+
+function setBookmarkToPosition(groupId, bookmarkName, bookmarkUrl, newPosition) {
+    const group = homeData.groups.find(g => g.id === groupId);
+    if (!group) return;
+    
+    const currentIndex = group.bookmarks.findIndex(b => b.name === bookmarkName && b.url === bookmarkUrl);
+    if (currentIndex === -1) return;
+    
+    // Remove bookmark from current position
+    const bookmark = group.bookmarks.splice(currentIndex, 1)[0];
+    
+    // Insert at new position (convert to 0-based index)
+    group.bookmarks.splice(newPosition - 1, 0, bookmark);
+    
+    saveData();
+    renderGroups();
+    
+    // Show confirmation
+    setTimeout(() => {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(74, 222, 128, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(74, 222, 128, 0.3);
+            z-index: 10000;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+        `;
+        notification.textContent = `"${bookmarkName}" moved to position ${newPosition}`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }, 100);
+}
+
+function moveBookmarkToGroup(currentGroupId, bookmarkName, bookmarkUrl) {
+    // Find the bookmark
+    const currentGroup = homeData.groups.find(g => g.id === currentGroupId);
+    if (!currentGroup) return;
+    
+    const bookmarkIndex = currentGroup.bookmarks.findIndex(b => b.name === bookmarkName && b.url === bookmarkUrl);
+    if (bookmarkIndex === -1) return;
+    
+    const bookmark = currentGroup.bookmarks[bookmarkIndex];
+    
+    // Create list of other groups
+    const otherGroups = homeData.groups.filter(g => g.id !== currentGroupId);
+    
+    if (otherGroups.length === 0) {
+        alert('No other groups available to move to.');
+        return;
+    }
+    
+    // Create selection dialog
+    let groupOptions = otherGroups.map((group, index) => `${index + 1}. ${group.title}`).join('\n');
+    const selection = prompt(`Move "${bookmarkName}" to which group?\n\n${groupOptions}\n\nEnter the number:`);
+    
+    if (selection === null) return; // User cancelled
+    
+    const selectedIndex = parseInt(selection) - 1;
+    if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= otherGroups.length) {
+        alert('Invalid selection. Please try again.');
+        return;
+    }
+    
+    const targetGroup = otherGroups[selectedIndex];
+    
+    // Remove from current group
+    currentGroup.bookmarks.splice(bookmarkIndex, 1);
+    
+    // Add to target group
+    targetGroup.bookmarks.push(bookmark);
+    
+    saveData();
+    renderGroups();
+    document.getElementById('contextMenu').style.display = 'none';
+    
+    // Show confirmation
+    setTimeout(() => {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(74, 222, 128, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(74, 222, 128, 0.3);
+            z-index: 10000;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+        `;
+        notification.textContent = `"${bookmarkName}" moved to "${targetGroup.title}"`;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }, 100);
 }
 
 // Export/Import functions
@@ -769,7 +1037,7 @@ function initializeDragAndResize() {
     
     // Groups are initialized in renderGroups()
     // Load saved positions and sizes
-    setTimeout(() => loadLayout(), 200);
+    loadLayout();
 }
 
 function makeDraggable(element) {
